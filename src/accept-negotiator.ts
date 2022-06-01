@@ -24,7 +24,7 @@ const resolveMediaTypes = (header: string): Map<string, Record<string, string>> 
 
         return [mediaType, attributes];
       })
-      .sort((entryA, entryB) => (entryB[1]['q'] as string).localeCompare(entryA[1]['q'] as string)),
+      .sort((entryA, entryB) => entryB[1]['q'].localeCompare(entryA[1]['q'])),
   );
 };
 
