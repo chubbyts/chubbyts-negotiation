@@ -33,7 +33,7 @@ const escapeStringRegexp = (regex: string): string => {
 };
 
 const compareMediaTypeWithTypeOnly = (
-  supportedMediaTypes: Array<string>,
+  supportedValues: Array<string>,
   mediaType: string,
   attributes: Record<string, string>,
 ): NegotiatedValue | undefined => {
@@ -43,9 +43,9 @@ const compareMediaTypeWithTypeOnly = (
     return undefined;
   }
 
-  for (const supportedMediaType of supportedMediaTypes) {
-    if (null !== supportedMediaType.match(new RegExp('^' + escapeStringRegexp(mediaTypeParts[1]) + '/'))) {
-      return { value: supportedMediaType, attributes };
+  for (const supportedValue of supportedValues) {
+    if (null !== supportedValue.match(new RegExp('^' + escapeStringRegexp(mediaTypeParts[1]) + '/'))) {
+      return { value: supportedValue, attributes };
     }
   }
 
@@ -53,24 +53,24 @@ const compareMediaTypeWithTypeOnly = (
 };
 
 const compareMediaTypes = (
-  supportedMediaTypes: Array<string>,
-  suffixBasedSupportedMediaTypes: Map<string | undefined, string>,
+  supportedValues: Array<string>,
+  suffixSupportedValues: Map<string | undefined, string>,
   mediaTypes: Map<string, Record<string, string>>,
 ): NegotiatedValue | undefined => {
   for (const [mediaType, attributes] of mediaTypes.entries()) {
-    if (-1 !== supportedMediaTypes.indexOf(mediaType)) {
+    if (-1 !== supportedValues.indexOf(mediaType)) {
       return { value: mediaType, attributes };
     }
   }
 
   for (const [mediaType, attributes] of mediaTypes.entries()) {
-    if (suffixBasedSupportedMediaTypes.has(mediaType)) {
-      return { value: suffixBasedSupportedMediaTypes.get(mediaType) as string, attributes };
+    if (suffixSupportedValues.has(mediaType)) {
+      return { value: suffixSupportedValues.get(mediaType) as string, attributes };
     }
   }
 
   for (const [mediaType, attributes] of mediaTypes.entries()) {
-    const negotiatedValue = compareMediaTypeWithTypeOnly(supportedMediaTypes, mediaType, attributes);
+    const negotiatedValue = compareMediaTypeWithTypeOnly(supportedValues, mediaType, attributes);
 
     if (undefined !== negotiatedValue) {
       return negotiatedValue;
@@ -78,33 +78,36 @@ const compareMediaTypes = (
   }
 
   if (mediaTypes.has('*/*')) {
-    return { value: supportedMediaTypes[0], attributes: mediaTypes.get('*/*') as Record<string, string> };
+    return { value: supportedValues[0], attributes: mediaTypes.get('*/*') as Record<string, string> };
   }
 
   return undefined;
 };
 
-export const createAcceptNegotiator = (supportedMediaTypes: Array<string>): Negotiator => {
-  const suffixBasedSupportedMediaTypes = new Map(
-    supportedMediaTypes.map((supportedMediaType) => {
-      const supportedMediaTypeParts = supportedMediaType.match(/([^\/+]+)\/([^\/+]+)\+([^\/+]+)/);
+export const createAcceptNegotiator = (supportedValues: Array<string>): Negotiator => {
+  const suffixSupportedValues = new Map(
+    supportedValues.map((supportedValue) => {
+      const supportedValueParts = supportedValue.match(/([^\/+]+)\/([^\/+]+)\+([^\/+]+)/);
 
       return [
-        null !== supportedMediaTypeParts ? supportedMediaTypeParts[1] + '/' + supportedMediaTypeParts[3] : undefined,
-        supportedMediaType,
+        null !== supportedValueParts ? supportedValueParts[1] + '/' + supportedValueParts[3] : undefined,
+        supportedValue,
       ];
     }),
   );
 
-  return (request: ServerRequest) => {
-    const accept = request.headers['accept'];
+  return {
+    negotiate: (request: ServerRequest) => {
+      const accept = request.headers['accept'];
 
-    if (!accept) {
-      return undefined;
-    }
+      if (!accept) {
+        return undefined;
+      }
 
-    const mediaTypes = resolveMediaTypes(accept.join(','));
+      const mediaTypes = resolveMediaTypes(accept.join(','));
 
-    return compareMediaTypes(supportedMediaTypes, suffixBasedSupportedMediaTypes, mediaTypes);
+      return compareMediaTypes(supportedValues, suffixSupportedValues, mediaTypes);
+    },
+    supportedValues,
   };
 };

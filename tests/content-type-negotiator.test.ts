@@ -14,13 +14,13 @@ describe('content-type-negotiator', () => {
   test('without supported mime types', () => {
     const negotiator = createContentTypeNegotiator([]);
 
-    expect(negotiator(createRequest())).toBeUndefined();
+    expect(negotiator.negotiate(createRequest())).toBeUndefined();
   });
 
   test('without header', () => {
     const negotiator = createContentTypeNegotiator(['application/json']);
 
-    expect(negotiator(createRequest())).toBeUndefined();
+    expect(negotiator.negotiate(createRequest())).toBeUndefined();
   });
 
   [
@@ -68,7 +68,7 @@ describe('content-type-negotiator', () => {
     test(`negotiate: ${JSON.stringify({ contentType, supportedMediaTypes })}`, () => {
       const negotiator = createContentTypeNegotiator(supportedMediaTypes);
 
-      expect(negotiator(createRequest(contentType))).toEqual(expectedContentType);
+      expect(negotiator.negotiate(createRequest(contentType))).toEqual(expectedContentType);
     });
   });
 });

@@ -30,7 +30,7 @@ const resolveAcceptLanguages = (header: string): Map<string, Record<string, stri
 
 const compareLanguage = (
   locale: string,
-  supportedLocales: Array<string>,
+  supportedValues: Array<string>,
   attributes: Record<string, string>,
 ): NegotiatedValue | undefined => {
   const localeParts = locale.match(/([^-]+)-([^-]+)$/);
@@ -41,7 +41,7 @@ const compareLanguage = (
 
   const language = localeParts[1];
 
-  if (supportedLocales.some((supportedLocale) => supportedLocale === language)) {
+  if (supportedValues.some((supportedLocale) => supportedLocale === language)) {
     return { value: language, attributes };
   }
 
@@ -49,17 +49,17 @@ const compareLanguage = (
 };
 
 const compareAcceptLanguages = (
-  supportedLocales: Array<string>,
+  supportedValues: Array<string>,
   acceptLanguages: Map<string, Record<string, string>>,
 ): NegotiatedValue | undefined => {
   for (const [locale, attributes] of acceptLanguages.entries()) {
-    if (-1 !== supportedLocales.indexOf(locale)) {
+    if (-1 !== supportedValues.indexOf(locale)) {
       return { value: locale, attributes };
     }
   }
 
   for (const [locale, attributes] of acceptLanguages.entries()) {
-    const negotiatedValue = compareLanguage(locale, supportedLocales, attributes);
+    const negotiatedValue = compareLanguage(locale, supportedValues, attributes);
 
     if (undefined !== negotiatedValue) {
       return negotiatedValue;
@@ -67,22 +67,25 @@ const compareAcceptLanguages = (
   }
 
   if (acceptLanguages.has('*')) {
-    return { value: supportedLocales[0], attributes: acceptLanguages.get('*') as Record<string, string> };
+    return { value: supportedValues[0], attributes: acceptLanguages.get('*') as Record<string, string> };
   }
 
   return undefined;
 };
 
-export const createAcceptLanguageNegotiator = (supportedLocales: Array<string>): Negotiator => {
-  return (request: ServerRequest) => {
-    const acceptLanguage = request.headers['accept-language'];
+export const createAcceptLanguageNegotiator = (supportedValues: Array<string>): Negotiator => {
+  return {
+    negotiate: (request: ServerRequest) => {
+      const acceptLanguage = request.headers['accept-language'];
 
-    if (!acceptLanguage) {
-      return undefined;
-    }
+      if (!acceptLanguage) {
+        return undefined;
+      }
 
-    const acceptLanguages = resolveAcceptLanguages(acceptLanguage.join(','));
+      const acceptLanguages = resolveAcceptLanguages(acceptLanguage.join(','));
 
-    return compareAcceptLanguages(supportedLocales, acceptLanguages);
+      return compareAcceptLanguages(supportedValues, acceptLanguages);
+    },
+    supportedValues,
   };
 };

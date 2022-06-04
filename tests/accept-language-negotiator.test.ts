@@ -14,13 +14,13 @@ describe('accept-language-negotiator', () => {
   test('without supported mime types', () => {
     const negotiator = createAcceptLanguageNegotiator([]);
 
-    expect(negotiator(createRequest())).toBeUndefined();
+    expect(negotiator.negotiate(createRequest())).toBeUndefined();
   });
 
   test('without header', () => {
     const negotiator = createAcceptLanguageNegotiator(['en']);
 
-    expect(negotiator(createRequest())).toBeUndefined();
+    expect(negotiator.negotiate(createRequest())).toBeUndefined();
   });
 
   [
@@ -110,7 +110,7 @@ describe('accept-language-negotiator', () => {
     test(`negotiate: ${JSON.stringify({ acceptLanguage, supportedLocales })}`, () => {
       const negotiator = createAcceptLanguageNegotiator(supportedLocales);
 
-      expect(negotiator(createRequest(acceptLanguage))).toEqual(expectedAcceptLanguage);
+      expect(negotiator.negotiate(createRequest(acceptLanguage))).toEqual(expectedAcceptLanguage);
     });
   });
 });

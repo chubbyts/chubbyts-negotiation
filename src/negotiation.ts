@@ -5,4 +5,7 @@ export type NegotiatedValue = {
   attributes: Record<string, string>;
 };
 
-export type Negotiator = (request: ServerRequest) => NegotiatedValue | undefined;
+export type Negotiator = {
+  negotiate: (request: ServerRequest) => NegotiatedValue | undefined;
+  supportedValues: Array<string>;
+};

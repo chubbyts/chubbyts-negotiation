@@ -24,7 +24,7 @@ A simple negotiation library.
 ## Requirements
 
  * node: 14
- * [@chubbyts/chubbyts-http-types][2]: ^1.0.0
+ * [@chubbyts/chubbyts-http-types][2]: ^2.0.0
 
 ## Installation
 
@@ -44,7 +44,7 @@ import { createAcceptLanguageNegotiator } from '@chubbyts/chubbyts-negotiation/d
 const request = { headers: { 'accept-language': ['de,en;q=0.3,en-US;q=0.7'] } };
 
 const negotiator = createAcceptLanguageNegotiator(['en', 'de']);
-const value = negotiator(request);
+const value = negotiator.negotiate(request);
 ```
 
 ### Accept
@@ -55,7 +55,7 @@ import { createAcceptNegotiator } from '@chubbyts/chubbyts-negotiation/dist/acce
 const request = { headers: { accept: ['text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q =0.8'] } };
 
 const negotiator = createAcceptNegotiator(['application/json', 'application/xml', 'application/x-yaml']);
-const value = negotiator(request);
+const value = negotiator.negotiate(request);
 ```
 
 ### Content-Type
@@ -66,7 +66,7 @@ import { createContentTypeNegotiator } from '@chubbyts/chubbyts-negotiation/dist
 const request = { headers: { 'content-type': ['application/xml; charset=UTF-8'] } };
 
 const negotiator = createContentTypeNegotiator(['application/json', 'application/xml', 'application/x-yaml']);
-const value = negotiator($request);
+const value = negotiator.negotiate($request);
 ```
 
 ## Copyright

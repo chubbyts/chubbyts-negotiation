@@ -2,7 +2,7 @@ import { ServerRequest } from '@chubbyts/chubbyts-http-types/dist/message';
 import { NegotiatedValue, Negotiator } from './negotiation';
 
 const compareMediaTypeWithSuffix = (
-  supportedMediaTypes: Array<string>,
+  supportedValues: Array<string>,
   mediaType: string,
   attributes: Record<string, string>,
 ): NegotiatedValue | undefined => {
@@ -14,12 +14,12 @@ const compareMediaTypeWithSuffix = (
 
   const mediaTypeFromParts = mediaTypeParts[1] + '/' + mediaTypeParts[3];
 
-  if (-1 !== supportedMediaTypes.indexOf(mediaTypeFromParts)) {
+  if (-1 !== supportedValues.indexOf(mediaTypeFromParts)) {
     return { value: mediaTypeFromParts, attributes };
   }
 };
 
-const compareMediaTypes = (supportedMediaTypes: Array<string>, header: string): NegotiatedValue | undefined => {
+const compareMediaTypes = (supportedValues: Array<string>, header: string): NegotiatedValue | undefined => {
   if (-1 !== header.search(/,/)) {
     return undefined;
   }
@@ -33,21 +33,24 @@ const compareMediaTypes = (supportedMediaTypes: Array<string>, header: string): 
     }),
   );
 
-  if (-1 !== supportedMediaTypes.indexOf(mediaType)) {
+  if (-1 !== supportedValues.indexOf(mediaType)) {
     return { value: mediaType, attributes };
   }
 
-  return compareMediaTypeWithSuffix(supportedMediaTypes, mediaType, attributes);
+  return compareMediaTypeWithSuffix(supportedValues, mediaType, attributes);
 };
 
-export const createContentTypeNegotiator = (supportedMediaTypes: Array<string>): Negotiator => {
-  return (request: ServerRequest) => {
-    const contentType = request.headers['content-type'];
+export const createContentTypeNegotiator = (supportedValues: Array<string>): Negotiator => {
+  return {
+    negotiate: (request: ServerRequest) => {
+      const contentType = request.headers['content-type'];
 
-    if (!contentType || contentType.length > 1) {
-      return undefined;
-    }
+      if (!contentType || contentType.length > 1) {
+        return undefined;
+      }
 
-    return compareMediaTypes(supportedMediaTypes, contentType[0]);
+      return compareMediaTypes(supportedValues, contentType[0]);
+    },
+    supportedValues,
   };
 };
