@@ -37,7 +37,7 @@ describe('content-type-negotiator', () => {
     {
       contentType: ['application/xml; charset=UTF-8,'],
       supportedMediaTypes: ['application/json', 'application/xml', 'application/x-yaml'],
-      expectedContentType: undefined,
+      expectedContentType: { value: 'application/xml', attributes: { charset: 'UTF-8' } },
     },
     {
       contentType: ['xml; charset=UTF-8'],
@@ -50,8 +50,13 @@ describe('content-type-negotiator', () => {
       expectedContentType: { value: 'application/xml', attributes: { charset: 'UTF-8' } },
     },
     {
-      contentType: ['application/jsonx+xml; charset=UTF-8', 'application/jsonx+xml; charset=UTF-8'],
+      contentType: ['application/jsonx+xml; charset=LATIN-1', 'application/jsonx+xml; charset=UTF-8'],
       supportedMediaTypes: ['application/xml'],
+      expectedContentType: { value: 'application/xml', attributes: { charset: 'UTF-8' } },
+    },
+    {
+      contentType: ['application/json; charset=UTF-8', 'application/jsonx+xml; charset=UTF-8'],
+      supportedMediaTypes: ['application/json', 'application/xml'],
       expectedContentType: undefined,
     },
     {

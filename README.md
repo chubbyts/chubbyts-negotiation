@@ -24,7 +24,7 @@ A simple negotiation library.
 ## Requirements
 
  * node: 14
- * [@chubbyts/chubbyts-http-types][2]: ^2.0.0
+ * [@chubbyts/chubbyts-http-types][2]: ^2.0.1
 
 ## Installation
 

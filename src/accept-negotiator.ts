@@ -1,32 +1,5 @@
 import { ServerRequest } from '@chubbyts/chubbyts-http-types/dist/message';
-import { NegotiatedValue, Negotiator } from './negotiation';
-
-const resolveMediaTypes = (header: string): Map<string, Record<string, string>> => {
-  return new Map(
-    header
-      .split(',')
-      .map((headerValue): [string, Record<string, string>] => {
-        const headerValueParts = headerValue.split(';');
-        const mediaType = (headerValueParts.shift() as string).trim();
-        const attributes: Record<string, string> = Object.fromEntries(
-          headerValueParts
-            .filter((attribute) => -1 !== attribute.search(/=/))
-            .map((attribute): [string, string] => {
-              const [attributeKey, attributeValue] = attribute.split('=');
-
-              return [attributeKey.trim(), attributeValue.trim()];
-            }),
-        );
-
-        if (!attributes['q']) {
-          attributes['q'] = '1.0';
-        }
-
-        return [mediaType, attributes];
-      })
-      .sort((entryA, entryB) => entryB[1]['q'].localeCompare(entryA[1]['q'])),
-  );
-};
+import { resolveHeaderToMap, NegotiatedValue, Negotiator } from './negotiation';
 
 const escapeStringRegexp = (regex: string): string => {
   return regex.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -55,21 +28,21 @@ const compareMediaTypeWithTypeOnly = (
 const compareMediaTypes = (
   supportedValues: Array<string>,
   suffixSupportedValues: Map<string | undefined, string>,
-  mediaTypes: Map<string, Record<string, string>>,
+  headerToMap: Map<string, Record<string, string>>,
 ): NegotiatedValue | undefined => {
-  for (const [mediaType, attributes] of mediaTypes.entries()) {
+  for (const [mediaType, attributes] of headerToMap.entries()) {
     if (-1 !== supportedValues.indexOf(mediaType)) {
       return { value: mediaType, attributes };
     }
   }
 
-  for (const [mediaType, attributes] of mediaTypes.entries()) {
+  for (const [mediaType, attributes] of headerToMap.entries()) {
     if (suffixSupportedValues.has(mediaType)) {
       return { value: suffixSupportedValues.get(mediaType) as string, attributes };
     }
   }
 
-  for (const [mediaType, attributes] of mediaTypes.entries()) {
+  for (const [mediaType, attributes] of headerToMap.entries()) {
     const negotiatedValue = compareMediaTypeWithTypeOnly(supportedValues, mediaType, attributes);
 
     if (undefined !== negotiatedValue) {
@@ -77,8 +50,8 @@ const compareMediaTypes = (
     }
   }
 
-  if (mediaTypes.has('*/*')) {
-    return { value: supportedValues[0], attributes: mediaTypes.get('*/*') as Record<string, string> };
+  if (headerToMap.has('*/*')) {
+    return { value: supportedValues[0], attributes: headerToMap.get('*/*') as Record<string, string> };
   }
 
   return undefined;
@@ -104,9 +77,9 @@ export const createAcceptNegotiator = (supportedValues: Array<string>): Negotiat
         return undefined;
       }
 
-      const mediaTypes = resolveMediaTypes(accept.join(','));
+      const headerToMap = resolveHeaderToMap(accept.join(','));
 
-      return compareMediaTypes(supportedValues, suffixSupportedValues, mediaTypes);
+      return compareMediaTypes(supportedValues, suffixSupportedValues, headerToMap);
     },
     supportedValues,
   };

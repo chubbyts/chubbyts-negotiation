@@ -1,5 +1,5 @@
 import { ServerRequest } from '@chubbyts/chubbyts-http-types/dist/message';
-import { NegotiatedValue, Negotiator } from './negotiation';
+import { resolveHeaderToMap, NegotiatedValue, Negotiator } from './negotiation';
 
 const compareMediaTypeWithSuffix = (
   supportedValues: Array<string>,
@@ -19,25 +19,23 @@ const compareMediaTypeWithSuffix = (
   }
 };
 
-const compareMediaTypes = (supportedValues: Array<string>, header: string): NegotiatedValue | undefined => {
-  if (-1 !== header.search(/,/)) {
+const compareMediaTypes = (
+  supportedValues: Array<string>,
+  headerToMap: Map<string, Record<string, string>>,
+): NegotiatedValue | undefined => {
+  const entries = Array.from(headerToMap.entries());
+  if (entries.length !== 1) {
     return undefined;
   }
 
-  const headerValueParts = header.split(';');
-  const mediaType = (headerValueParts.shift() as string).trim();
-  const attributes: Record<string, string> = Object.fromEntries(
-    headerValueParts.map((attribute: string) => {
-      const [attributeKey, attributeValue] = attribute.split('=');
-      return [attributeKey.trim(), attributeValue.trim()];
-    }),
-  );
+  const [mediaType, attributes] = entries[0];
+  const { q, ...otherAttriutes } = attributes;
 
   if (-1 !== supportedValues.indexOf(mediaType)) {
-    return { value: mediaType, attributes };
+    return { value: mediaType, attributes: otherAttriutes };
   }
 
-  return compareMediaTypeWithSuffix(supportedValues, mediaType, attributes);
+  return compareMediaTypeWithSuffix(supportedValues, mediaType, otherAttriutes);
 };
 
 export const createContentTypeNegotiator = (supportedValues: Array<string>): Negotiator => {
@@ -45,11 +43,13 @@ export const createContentTypeNegotiator = (supportedValues: Array<string>): Neg
     negotiate: (request: ServerRequest) => {
       const contentType = request.headers['content-type'];
 
-      if (!contentType || contentType.length > 1) {
+      if (!contentType) {
         return undefined;
       }
 
-      return compareMediaTypes(supportedValues, contentType[0]);
+      const headerToMap = resolveHeaderToMap(contentType.join(','));
+
+      return compareMediaTypes(supportedValues, headerToMap);
     },
     supportedValues,
   };

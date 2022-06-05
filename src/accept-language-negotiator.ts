@@ -1,32 +1,5 @@
 import { ServerRequest } from '@chubbyts/chubbyts-http-types/dist/message';
-import { NegotiatedValue, Negotiator } from './negotiation';
-
-const resolveAcceptLanguages = (header: string): Map<string, Record<string, string>> => {
-  return new Map(
-    header
-      .split(',')
-      .map((headerValue): [string, Record<string, string>] => {
-        const headerValueParts = headerValue.split(';');
-        const locale = (headerValueParts.shift() as string).trim();
-        const attributes: Record<string, string> = Object.fromEntries(
-          headerValueParts
-            .filter((attribute) => -1 !== attribute.search(/=/))
-            .map((attribute): [string, string] => {
-              const [attributeKey, attributeValue] = attribute.split('=');
-
-              return [attributeKey.trim(), attributeValue.trim()];
-            }),
-        );
-
-        if (!attributes['q']) {
-          attributes['q'] = '1.0';
-        }
-
-        return [locale, attributes];
-      })
-      .sort((entryA, entryB) => entryB[1]['q'].localeCompare(entryA[1]['q'])),
-  );
-};
+import { resolveHeaderToMap, NegotiatedValue, Negotiator } from './negotiation';
 
 const compareLanguage = (
   locale: string,
@@ -50,15 +23,15 @@ const compareLanguage = (
 
 const compareAcceptLanguages = (
   supportedValues: Array<string>,
-  acceptLanguages: Map<string, Record<string, string>>,
+  headerToMap: Map<string, Record<string, string>>,
 ): NegotiatedValue | undefined => {
-  for (const [locale, attributes] of acceptLanguages.entries()) {
+  for (const [locale, attributes] of headerToMap.entries()) {
     if (-1 !== supportedValues.indexOf(locale)) {
       return { value: locale, attributes };
     }
   }
 
-  for (const [locale, attributes] of acceptLanguages.entries()) {
+  for (const [locale, attributes] of headerToMap.entries()) {
     const negotiatedValue = compareLanguage(locale, supportedValues, attributes);
 
     if (undefined !== negotiatedValue) {
@@ -66,8 +39,8 @@ const compareAcceptLanguages = (
     }
   }
 
-  if (acceptLanguages.has('*')) {
-    return { value: supportedValues[0], attributes: acceptLanguages.get('*') as Record<string, string> };
+  if (headerToMap.has('*')) {
+    return { value: supportedValues[0], attributes: headerToMap.get('*') as Record<string, string> };
   }
 
   return undefined;
@@ -82,9 +55,9 @@ export const createAcceptLanguageNegotiator = (supportedValues: Array<string>): 
         return undefined;
       }
 
-      const acceptLanguages = resolveAcceptLanguages(acceptLanguage.join(','));
+      const headerToMap = resolveHeaderToMap(acceptLanguage.join(','));
 
-      return compareAcceptLanguages(supportedValues, acceptLanguages);
+      return compareAcceptLanguages(supportedValues, headerToMap);
     },
     supportedValues,
   };
