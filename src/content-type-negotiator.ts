@@ -1,4 +1,3 @@
-import { ServerRequest } from '@chubbyts/chubbyts-http-types/dist/message';
 import { resolveHeaderToMap, NegotiatedValue, Negotiator } from './negotiation';
 
 const compareMediaTypeWithSuffix = (
@@ -40,14 +39,8 @@ const compareMediaTypes = (
 
 export const createContentTypeNegotiator = (supportedValues: Array<string>): Negotiator => {
   return {
-    negotiate: (request: ServerRequest) => {
-      const contentType = request.headers['content-type'];
-
-      if (!contentType) {
-        return undefined;
-      }
-
-      const headerToMap = resolveHeaderToMap(contentType.join(','));
+    negotiate: (header: string) => {
+      const headerToMap = resolveHeaderToMap(header);
 
       return compareMediaTypes(supportedValues, headerToMap);
     },

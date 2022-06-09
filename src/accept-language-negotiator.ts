@@ -1,4 +1,3 @@
-import { ServerRequest } from '@chubbyts/chubbyts-http-types/dist/message';
 import { resolveHeaderToMap, NegotiatedValue, Negotiator } from './negotiation';
 
 const compareLanguage = (
@@ -48,14 +47,8 @@ const compareAcceptLanguages = (
 
 export const createAcceptLanguageNegotiator = (supportedValues: Array<string>): Negotiator => {
   return {
-    negotiate: (request: ServerRequest) => {
-      const acceptLanguage = request.headers['accept-language'];
-
-      if (!acceptLanguage) {
-        return undefined;
-      }
-
-      const headerToMap = resolveHeaderToMap(acceptLanguage.join(','));
+    negotiate: (header: string) => {
+      const headerToMap = resolveHeaderToMap(header);
 
       return compareAcceptLanguages(supportedValues, headerToMap);
     },

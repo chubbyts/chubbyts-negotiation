@@ -1,4 +1,3 @@
-import { ServerRequest } from '@chubbyts/chubbyts-http-types/dist/message';
 import { resolveHeaderToMap, NegotiatedValue, Negotiator } from './negotiation';
 
 const escapeStringRegexp = (regex: string): string => {
@@ -70,14 +69,8 @@ export const createAcceptNegotiator = (supportedValues: Array<string>): Negotiat
   );
 
   return {
-    negotiate: (request: ServerRequest) => {
-      const accept = request.headers['accept'];
-
-      if (!accept) {
-        return undefined;
-      }
-
-      const headerToMap = resolveHeaderToMap(accept.join(','));
+    negotiate: (header: string) => {
+      const headerToMap = resolveHeaderToMap(header);
 
       return compareMediaTypes(supportedValues, suffixSupportedValues, headerToMap);
     },

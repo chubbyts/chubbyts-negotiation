@@ -24,14 +24,13 @@ A simple negotiation library.
 ## Requirements
 
  * node: 14
- * [@chubbyts/chubbyts-http-types][2]: ^2.0.1
 
 ## Installation
 
 Through [NPM](https://www.npmjs.com) as [@chubbyts/chubbyts-negotiation][1].
 
 ```ts
-npm i @chubbyts/chubbyts-negotiation
+npm i @chubbyts/chubbyts-negotiation@^3.0.0
 ```
 
 ## Usage
@@ -41,10 +40,8 @@ npm i @chubbyts/chubbyts-negotiation
 ```ts
 import { createAcceptLanguageNegotiator } from '@chubbyts/chubbyts-negotiation/dist/accept-language-negotiator';
 
-const request = { headers: { 'accept-language': ['de,en;q=0.3,en-US;q=0.7'] } };
-
 const negotiator = createAcceptLanguageNegotiator(['en', 'de']);
-const value = negotiator.negotiate(request);
+const value = negotiator.negotiate('de,en;q=0.3,en-US;q=0.7');
 ```
 
 ### Accept
@@ -52,10 +49,8 @@ const value = negotiator.negotiate(request);
 ```ts
 import { createAcceptNegotiator } from '@chubbyts/chubbyts-negotiation/dist/accept-negotiator';
 
-const request = { headers: { accept: ['text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q =0.8'] } };
-
 const negotiator = createAcceptNegotiator(['application/json', 'application/xml', 'application/x-yaml']);
-const value = negotiator.negotiate(request);
+const value = negotiator.negotiate('text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q =0.8');
 ```
 
 ### Content-Type
@@ -63,10 +58,8 @@ const value = negotiator.negotiate(request);
 ```ts
 import { createContentTypeNegotiator } from '@chubbyts/chubbyts-negotiation/dist/content-type-negotiator';
 
-const request = { headers: { 'content-type': ['application/xml; charset=UTF-8'] } };
-
 const negotiator = createContentTypeNegotiator(['application/json', 'application/xml', 'application/x-yaml']);
-const value = negotiator.negotiate($request);
+const value = negotiator.negotiate('application/xml; charset=UTF-8');
 ```
 
 ## Copyright
@@ -74,4 +67,3 @@ const value = negotiator.negotiate($request);
 Dominik Zogg 2022
 
 [1]: https://www.npmjs.com/package/@chubbyts/chubbyts-negotiation
-[2]: https://www.npmjs.com/package/@chubbyts/chubbyts-http-types
