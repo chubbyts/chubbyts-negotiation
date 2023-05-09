@@ -1,11 +1,12 @@
-import { resolveHeaderToMap, NegotiatedValue, Negotiator } from './negotiation';
+import type { NegotiatedValue, Negotiator } from './negotiation';
+import { resolveHeaderToMap } from './negotiation';
 
 const compareMediaTypeWithSuffix = (
   supportedValues: Array<string>,
   mediaType: string,
   attributes: Record<string, string>,
 ): NegotiatedValue | undefined => {
-  const mediaTypeParts = mediaType.match(/([^\/]+)\/([^+]+)\+(.+)/);
+  const mediaTypeParts = mediaType.match(/([^/]+)\/([^+]+)\+(.+)/);
 
   if (null === mediaTypeParts) {
     return undefined;
@@ -28,7 +29,7 @@ const compareMediaTypes = (
   }
 
   const [mediaType, attributes] = entries[0];
-  const { q, ...otherAttriutes } = attributes;
+  const { q: _, ...otherAttriutes } = attributes;
 
   if (-1 !== supportedValues.indexOf(mediaType)) {
     return { value: mediaType, attributes: otherAttriutes };

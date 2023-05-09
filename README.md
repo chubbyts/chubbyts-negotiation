@@ -23,14 +23,14 @@ A simple negotiation library.
 
 ## Requirements
 
- * node: 14
+ * node: 16
 
 ## Installation
 
 Through [NPM](https://www.npmjs.com) as [@chubbyts/chubbyts-negotiation][1].
 
 ```ts
-npm i @chubbyts/chubbyts-negotiation@^3.0.1
+npm i @chubbyts/chubbyts-negotiation@^3.1.0
 ```
 
 ## Usage

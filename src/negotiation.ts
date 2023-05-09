@@ -13,10 +13,10 @@ export const resolveHeaderToMap = (header: string): Map<string, Record<string, s
     header
       .split(',')
       .map((headerValue): [string, Record<string, string>] => {
-        const headerValueParts = headerValue.split(';');
-        const locale = (headerValueParts.shift() as string).trim();
+        const [notTrimmedName, ...notSplittedAttributes] = headerValue.split(';');
+        const name = notTrimmedName.trim();
         const attributes: Record<string, string> = Object.fromEntries(
-          headerValueParts
+          notSplittedAttributes
             .filter((attribute) => -1 !== attribute.search(/=/))
             .map((attribute): [string, string] => {
               const [attributeKey, attributeValue] = attribute.split('=');
@@ -25,11 +25,7 @@ export const resolveHeaderToMap = (header: string): Map<string, Record<string, s
             }),
         );
 
-        if (!attributes['q']) {
-          attributes['q'] = '1.0';
-        }
-
-        return [locale, attributes];
+        return [name, { ...attributes, q: attributes['q'] ?? '1.0' }];
       })
       .filter(([locale]) => locale !== '')
       .sort((a, b) => b[1]['q'].localeCompare(a[1]['q'])),

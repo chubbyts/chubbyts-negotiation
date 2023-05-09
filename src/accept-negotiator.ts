@@ -1,4 +1,5 @@
-import { resolveHeaderToMap, NegotiatedValue, Negotiator } from './negotiation';
+import type { NegotiatedValue, Negotiator } from './negotiation';
+import { resolveHeaderToMap } from './negotiation';
 
 const escapeStringRegexp = (regex: string): string => {
   return regex.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -9,7 +10,7 @@ const compareMediaTypeWithTypeOnly = (
   mediaType: string,
   attributes: Record<string, string>,
 ): NegotiatedValue | undefined => {
-  const mediaTypeParts = mediaType.match(/([^\/+]+)\/\*/);
+  const mediaTypeParts = mediaType.match(/([^/+]+)\/\*/);
 
   if (null === mediaTypeParts) {
     return undefined;
@@ -59,7 +60,7 @@ const compareMediaTypes = (
 export const createAcceptNegotiator = (supportedValues: Array<string>): Negotiator => {
   const suffixSupportedValues = new Map(
     supportedValues.map((supportedValue) => {
-      const supportedValueParts = supportedValue.match(/([^\/+]+)\/([^\/+]+)\+([^\/+]+)/);
+      const supportedValueParts = supportedValue.match(/([^/+]+)\/([^/+]+)\+([^/+]+)/);
 
       return [
         null !== supportedValueParts ? supportedValueParts[1] + '/' + supportedValueParts[3] : undefined,

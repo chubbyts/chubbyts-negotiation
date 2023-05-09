@@ -1,4 +1,5 @@
-import { resolveHeaderToMap, NegotiatedValue, Negotiator } from './negotiation';
+import type { NegotiatedValue, Negotiator } from './negotiation';
+import { resolveHeaderToMap } from './negotiation';
 
 const compareLanguage = (
   locale: string,
