@@ -30,7 +30,7 @@ A simple negotiation library.
 Through [NPM](https://www.npmjs.com) as [@chubbyts/chubbyts-negotiation][1].
 
 ```ts
-npm i @chubbyts/chubbyts-negotiation@^3.1.0
+npm i @chubbyts/chubbyts-negotiation@^3.1.1
 ```
 
 ## Usage
