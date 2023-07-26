@@ -1,7 +1,7 @@
 {
   "name": "@chubbyts/chubbyts-negotiation",
   "type": "module",
-  "version": "3.2.1",
+  "version": "3.2.2",
   "description": "A simple negotiation library.",
   "keywords": [
     "chubbyts",
@@ -14,7 +14,7 @@
   "license": "MIT",
   "repository": "chubbyts/chubbyts-negotiation",
   "scripts": {
-    "build": "rm -rf ./dist && tsc -b ./tsconfig.types.json ./tsconfig.esm.json ./tsconfig.cjs.json && node ./rename-commonjs.js",
+    "build": "node ./build.js",
     "cs-fix": "prettier --write src tests",
     "cs": "prettier --check src tests",
     "infection": "stryker run",
@@ -48,8 +48,8 @@
     "./*": {
       "types": "./*.d.ts",
       "require": "./*.cjs",
-      "import": "./*.js",
-      "default": "./*.js"
+      "import": "./*.mjs",
+      "default": "./*.mjs"
     }
   },
   "engines": {
@@ -58,7 +58,7 @@
   "dependencies": {},
   "devDependencies": {
     "@chubbyts/chubbyts-eslint": "^2.0.2",
-    "@chubbyts/chubbyts-packaging": "^1.1.0",
+    "@chubbyts/chubbyts-packaging": "^2.0.0",
     "@stryker-mutator/core": "^7.1.1",
     "@stryker-mutator/jest-runner": "^7.1.1",
     "@types/jest": "^29.5.3",
