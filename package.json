@@ -1,7 +1,7 @@
 {
   "name": "@chubbyts/chubbyts-negotiation",
   "type": "module",
-  "version": "3.2.0",
+  "version": "3.2.1",
   "description": "A simple negotiation library.",
   "keywords": [
     "chubbyts",
@@ -58,7 +58,7 @@
   "dependencies": {},
   "devDependencies": {
     "@chubbyts/chubbyts-eslint": "^2.0.2",
-    "@chubbyts/chubbyts-packaging": "^1.0.3",
+    "@chubbyts/chubbyts-packaging": "^1.1.0",
     "@stryker-mutator/core": "^7.1.1",
     "@stryker-mutator/jest-runner": "^7.1.1",
     "@types/jest": "^29.5.3",
