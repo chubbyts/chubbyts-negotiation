@@ -23,14 +23,14 @@ A simple negotiation library.
 
 ## Requirements
 
- * node: 16
+ * node: 18
 
 ## Installation
 
 Through [NPM](https://www.npmjs.com) as [@chubbyts/chubbyts-negotiation][1].
 
 ```ts
-npm i @chubbyts/chubbyts-negotiation@^3.2.2
+npm i @chubbyts/chubbyts-negotiation@^3.3.0
 ```
 
 ## Usage
@@ -64,6 +64,6 @@ const value = negotiator.negotiate('application/xml; charset=UTF-8');
 
 ## Copyright
 
-2024 Dominik Zogg
+2025 Dominik Zogg
 
 [1]: https://www.npmjs.com/package/@chubbyts/chubbyts-negotiation
