@@ -1,5 +1,5 @@
-import type { NegotiatedValue, Negotiator } from './negotiation';
-import { resolveHeaderToMap } from './negotiation';
+import type { NegotiatedValue, Negotiator } from './negotiation.js';
+import { resolveHeaderToMap } from './negotiation.js';
 
 const escapeStringRegexp = (regex: string): string => {
   return regex.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
