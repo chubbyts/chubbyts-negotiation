@@ -64,6 +64,6 @@ const value = negotiator.negotiate('application/xml; charset=UTF-8');
 
 ## Copyright
 
-2025 Dominik Zogg
+2026 Dominik Zogg
 
 [1]: https://www.npmjs.com/package/@chubbyts/chubbyts-negotiation
