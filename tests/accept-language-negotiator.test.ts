@@ -66,6 +66,11 @@ describe('accept-language-negotiator', () => {
       expectedAcceptLanguage: { value: 'de', attributes: { q: '1.0' } },
     },
     {
+      acceptLanguage: 'de-CH',
+      supportedLocales: ['fr', 'de'],
+      expectedAcceptLanguage: { value: 'de', attributes: { q: '1.0' } },
+    },
+    {
       acceptLanguage: 'de',
       supportedLocales: ['de-CH'],
       expectedAcceptLanguage: undefined,
