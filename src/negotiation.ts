@@ -28,6 +28,7 @@ export const resolveHeaderToMap = (header: string): Map<string, Record<string, s
         return [name, { ...attributes, q: attributes['q'] ?? '1.0' }];
       })
       .filter(([locale]) => locale !== '')
+      // oxlint-disable-next-line unicorn/no-array-sort
       .sort((a, b) => b[1]['q'].localeCompare(a[1]['q'])),
   );
 };
