@@ -6,15 +6,12 @@ const compareMediaTypeWithSuffix = (
   mediaType: string,
   attributes: Record<string, string>,
 ): NegotiatedValue | undefined => {
-  const mediaTypeParts = mediaType.match(/([^/]+)\/([^+]+)\+(.+)/);
+  const [type, subtypeWithSuffix] = mediaType.split('/');
+  const suffix = subtypeWithSuffix?.split('+')[1];
 
-  if (null === mediaTypeParts) {
-    return undefined;
-  }
+  const mediaTypeFromParts = `${type}/${suffix}`;
 
-  const mediaTypeFromParts = mediaTypeParts[1] + '/' + mediaTypeParts[3];
-
-  if (-1 !== supportedValues.indexOf(mediaTypeFromParts)) {
+  if (supportedValues.includes(mediaTypeFromParts)) {
     return { value: mediaTypeFromParts, attributes };
   }
 };
@@ -31,7 +28,7 @@ const compareMediaTypes = (
   const [mediaType, attributes] = entries[0];
   const { q: _, ...otherAttriutes } = attributes;
 
-  if (-1 !== supportedValues.indexOf(mediaType)) {
+  if (supportedValues.includes(mediaType)) {
     return { value: mediaType, attributes: otherAttriutes };
   }
 

@@ -126,6 +126,18 @@ describe('accept-negotiator', () => {
       expectedAccept: { value: 'application/ld+json', attributes: { q: '1.0' } },
     },
     {
+      // invalid supported media type - missing subtype
+      accept: 'application/json',
+      supportedMediaTypes: ['json'],
+      expectedAccept: undefined,
+    },
+    {
+      // supported media types without suffix must not lead to suffix based matches
+      accept: 'application/undefined',
+      supportedMediaTypes: ['application/xml'],
+      expectedAccept: undefined,
+    },
+    {
       accept: 'application/json;',
       supportedMediaTypes: ['application/json'],
       expectedAccept: { value: 'application/json', attributes: { q: '1.0' } },

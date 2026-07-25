@@ -6,15 +6,14 @@ const compareLanguage = (
   supportedValues: Array<string>,
   attributes: Record<string, string>,
 ): NegotiatedValue | undefined => {
-  const localeParts = locale.match(/([^-]+)-([^-]+)$/);
+  const localeParts = locale.split('-');
+  const language = localeParts.at(-2) ?? locale;
 
-  if (null === localeParts) {
+  if ('' === localeParts.at(-1)) {
     return undefined;
   }
 
-  const language = localeParts[1];
-
-  if (supportedValues.some((supportedLocale) => supportedLocale === language)) {
+  if (supportedValues.includes(language)) {
     return { value: language, attributes };
   }
 
@@ -26,7 +25,7 @@ const compareAcceptLanguages = (
   headerToMap: Map<string, Record<string, string>>,
 ): NegotiatedValue | undefined => {
   for (const [locale, attributes] of headerToMap.entries()) {
-    if (-1 !== supportedValues.indexOf(locale)) {
+    if (supportedValues.includes(locale)) {
       return { value: locale, attributes };
     }
   }

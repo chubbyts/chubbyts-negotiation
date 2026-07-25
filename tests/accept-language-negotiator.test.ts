@@ -81,6 +81,18 @@ describe('accept-language-negotiator', () => {
       expectedAcceptLanguage: { value: 'de', attributes: { q: '0.1' } },
     },
     {
+      // invalid header - locale with trailing dash
+      acceptLanguage: 'de-',
+      supportedLocales: ['de'],
+      expectedAcceptLanguage: undefined,
+    },
+    {
+      // invalid header - multi part locale with trailing dash
+      acceptLanguage: 'x-de-',
+      supportedLocales: ['de'],
+      expectedAcceptLanguage: undefined,
+    },
+    {
       acceptLanguage: 'de-DE-AT,en-US',
       supportedLocales: ['de'],
       expectedAcceptLanguage: undefined,

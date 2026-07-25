@@ -1,23 +1,19 @@
 import type { NegotiatedValue, Negotiator } from './negotiation.js';
 import { resolveHeaderToMap } from './negotiation.js';
 
-const escapeStringRegexp = (regex: string): string => {
-  return regex.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-};
-
 const compareMediaTypeWithTypeOnly = (
   supportedValues: Array<string>,
   mediaType: string,
   attributes: Record<string, string>,
 ): NegotiatedValue | undefined => {
-  const mediaTypeParts = mediaType.match(/([^/+]+)\/\*/);
-
-  if (null === mediaTypeParts) {
+  if (!mediaType.endsWith('/*')) {
     return undefined;
   }
 
+  const typePrefix = mediaType.slice(0, -1);
+
   for (const supportedValue of supportedValues) {
-    if (null !== supportedValue.match(new RegExp('^' + escapeStringRegexp(mediaTypeParts[1]) + '/'))) {
+    if (supportedValue.startsWith(typePrefix)) {
       return { value: supportedValue, attributes };
     }
   }
@@ -31,7 +27,7 @@ const compareMediaTypes = (
   headerToMap: Map<string, Record<string, string>>,
 ): NegotiatedValue | undefined => {
   for (const [mediaType, attributes] of headerToMap.entries()) {
-    if (-1 !== supportedValues.indexOf(mediaType)) {
+    if (supportedValues.includes(mediaType)) {
       return { value: mediaType, attributes };
     }
   }
@@ -60,12 +56,10 @@ const compareMediaTypes = (
 export const createAcceptNegotiator = (supportedValues: Array<string>): Negotiator => {
   const suffixSupportedValues = new Map(
     supportedValues.map((supportedValue) => {
-      const supportedValueParts = supportedValue.match(/([^/+]+)\/([^/+]+)\+([^/+]+)/);
+      const [type, subtypeWithSuffix] = supportedValue.split('/');
+      const suffix = subtypeWithSuffix?.split('+')[1];
 
-      return [
-        null !== supportedValueParts ? supportedValueParts[1] + '/' + supportedValueParts[3] : undefined,
-        supportedValue,
-      ];
+      return [undefined !== suffix ? type + '/' + suffix : undefined, supportedValue];
     }),
   );
 
