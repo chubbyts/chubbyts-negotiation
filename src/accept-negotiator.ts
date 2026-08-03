@@ -1,5 +1,10 @@
 import type { NegotiatedValue, Negotiator } from './negotiation.js';
-import { resolveHeaderToMap } from './negotiation.js';
+import {
+  resolveAcceptableAndRefused,
+  resolveExactMatch,
+  resolveHeaderToMap,
+  resolveWildcardMatch,
+} from './negotiation.js';
 
 const compareMediaTypeWithTypeOnly = (
   supportedValues: Array<string>,
@@ -26,31 +31,43 @@ const compareMediaTypes = (
   suffixSupportedValues: Map<string | undefined, string>,
   headerToMap: Map<string, Record<string, string>>,
 ): NegotiatedValue | undefined => {
-  for (const [mediaType, attributes] of headerToMap.entries()) {
-    if (supportedValues.includes(mediaType)) {
-      return { value: mediaType, attributes };
+  const { acceptableEntries, refusedValues } = resolveAcceptableAndRefused(headerToMap);
+
+  const isRefusedExactly = (supportedValue: string): boolean => refusedValues.includes(supportedValue);
+
+  const isRefusedBySuffix = (supportedValue: string): boolean =>
+    refusedValues.some((mediaType) => suffixSupportedValues.get(mediaType) === supportedValue);
+
+  const isRefusedByTypeOnly = (supportedValue: string): boolean =>
+    refusedValues.some((mediaType) => mediaType.endsWith('/*') && supportedValue.startsWith(mediaType.slice(0, -1)));
+
+  const exactMatch = resolveExactMatch(supportedValues, acceptableEntries);
+
+  if (undefined !== exactMatch) {
+    return exactMatch;
+  }
+
+  for (const [mediaType, attributes] of acceptableEntries) {
+    const suffixSupportedValue = suffixSupportedValues.get(mediaType);
+
+    if (undefined !== suffixSupportedValue && !isRefusedExactly(suffixSupportedValue)) {
+      return { value: suffixSupportedValue, attributes };
     }
   }
 
-  for (const [mediaType, attributes] of headerToMap.entries()) {
-    if (suffixSupportedValues.has(mediaType)) {
-      return { value: suffixSupportedValues.get(mediaType) as string, attributes };
-    }
-  }
+  const supportedValuesForTypeOnly = supportedValues.filter(
+    (supportedValue) => !isRefusedExactly(supportedValue) && !isRefusedBySuffix(supportedValue),
+  );
 
-  for (const [mediaType, attributes] of headerToMap.entries()) {
-    const negotiatedValue = compareMediaTypeWithTypeOnly(supportedValues, mediaType, attributes);
+  for (const [mediaType, attributes] of acceptableEntries) {
+    const negotiatedValue = compareMediaTypeWithTypeOnly(supportedValuesForTypeOnly, mediaType, attributes);
 
     if (undefined !== negotiatedValue) {
       return negotiatedValue;
     }
   }
 
-  if (headerToMap.has('*/*')) {
-    return { value: supportedValues[0], attributes: headerToMap.get('*/*') as Record<string, string> };
-  }
-
-  return undefined;
+  return resolveWildcardMatch('*/*', acceptableEntries, supportedValuesForTypeOnly, isRefusedByTypeOnly);
 };
 
 export const createAcceptNegotiator = (supportedValues: Array<string>): Negotiator => {

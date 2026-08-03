@@ -147,6 +147,60 @@ describe('accept-negotiator', () => {
       supportedMediaTypes: ['application/json'],
       expectedAccept: { value: 'application/json', attributes: { q: '1.0' } },
     },
+    {
+      // q=0 means "not acceptable"
+      accept: 'application/json;q=0',
+      supportedMediaTypes: ['application/json'],
+      expectedAccept: undefined,
+    },
+    {
+      // q=0 vetoes the */* fallback for the refused media type
+      accept: 'application/json;q=0, */*;q=0.5',
+      supportedMediaTypes: ['application/json', 'application/xml'],
+      expectedAccept: { value: 'application/xml', attributes: { q: '0.5' } },
+    },
+    {
+      // q=0 vetoes the */* fallback, no other supported media type left
+      accept: 'application/json;q=0, */*;q=0.5',
+      supportedMediaTypes: ['application/json'],
+      expectedAccept: undefined,
+    },
+    {
+      // exact q=0 vetoes the type wildcard match for the refused media type
+      accept: 'text/html;q=0, text/*',
+      supportedMediaTypes: ['text/html', 'text/plain'],
+      expectedAccept: { value: 'text/plain', attributes: { q: '1.0' } },
+    },
+    {
+      // exact q=0 vetoes the suffix based match for the refused media type
+      accept: 'application/ld+json;q=0, application/json;q=0.5',
+      supportedMediaTypes: ['application/ld+json'],
+      expectedAccept: undefined,
+    },
+    {
+      // type wildcard q=0 vetoes the */* fallback for all matching media types
+      accept: 'application/*;q=0, */*',
+      supportedMediaTypes: ['application/json', 'text/html'],
+      expectedAccept: { value: 'text/html', attributes: { q: '1.0' } },
+    },
+    {
+      // q=0 vetoes the */* fallback for the suffix based matching media type
+      accept: 'application/json;q=0, */*',
+      supportedMediaTypes: ['application/ld+json', 'text/html'],
+      expectedAccept: { value: 'text/html', attributes: { q: '1.0' } },
+    },
+    {
+      // a refused media type must not veto media types it is only a prefix of
+      accept: 'text/htm;q=0, */*',
+      supportedMediaTypes: ['text/html'],
+      expectedAccept: { value: 'text/html', attributes: { q: '1.0' } },
+    },
+    {
+      // a refused type wildcard must not veto media types of other types
+      accept: 'audio/*;q=0, */*',
+      supportedMediaTypes: ['application/json'],
+      expectedAccept: { value: 'application/json', attributes: { q: '1.0' } },
+    },
   ].forEach(({ accept, supportedMediaTypes, expectedAccept }) => {
     test(`negotiate: ${JSON.stringify({ accept, supportedMediaTypes })}`, () => {
       const negotiator = createAcceptNegotiator(supportedMediaTypes);

@@ -114,6 +114,36 @@ describe('accept-language-negotiator', () => {
       supportedLocales: ['de'],
       expectedAcceptLanguage: { value: 'de', attributes: { q: '1.0' } },
     },
+    {
+      // q=0 means "not acceptable"
+      acceptLanguage: 'de;q=0',
+      supportedLocales: ['de'],
+      expectedAcceptLanguage: undefined,
+    },
+    {
+      // q=0 vetoes the * fallback for the refused locale
+      acceptLanguage: 'de;q=0, *;q=0.5',
+      supportedLocales: ['de', 'en'],
+      expectedAcceptLanguage: { value: 'en', attributes: { q: '0.5' } },
+    },
+    {
+      // q=0 vetoes the * fallback, no other supported locale left
+      acceptLanguage: 'de;q=0, *;q=0.5',
+      supportedLocales: ['de'],
+      expectedAcceptLanguage: undefined,
+    },
+    {
+      // exact q=0 vetoes the language based match for the refused locale
+      acceptLanguage: 'de;q=0, de-CH',
+      supportedLocales: ['de'],
+      expectedAcceptLanguage: undefined,
+    },
+    {
+      // q=0 vetoes the * fallback for the language based matching locale
+      acceptLanguage: 'de-CH;q=0, *',
+      supportedLocales: ['de', 'en'],
+      expectedAcceptLanguage: { value: 'en', attributes: { q: '1.0' } },
+    },
   ].forEach(({ acceptLanguage, supportedLocales, expectedAcceptLanguage }) => {
     test(`negotiate: ${JSON.stringify({ acceptLanguage, supportedLocales })}`, () => {
       const negotiator = createAcceptLanguageNegotiator(supportedLocales);

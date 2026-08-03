@@ -1,5 +1,12 @@
 import { describe, expect, test } from 'vitest';
-import { resolveHeaderToMap } from '../src/negotiation';
+import type { HeaderEntry } from '../src/negotiation';
+import {
+  resolveAcceptableAndRefused,
+  resolveExactMatch,
+  resolveHeaderToMap,
+  resolveQuality,
+  resolveWildcardMatch,
+} from '../src/negotiation';
 
 describe('negotiation', () => {
   [
@@ -300,6 +307,22 @@ describe('negotiation', () => {
       expectMap: new Map([['application/jsonx+xml', { charset: 'UTF-8', q: '1.0' }]]),
     },
     {
+      // q=0 entries are kept and sorted last
+      header: 'application/json;q=0, application/xml;q=0.5',
+      expectMap: new Map([
+        ['application/xml', { q: '0.5' }],
+        ['application/json', { q: '0' }],
+      ]),
+    },
+    {
+      // invalid q ('.5' misses the leading digit) counts as 1 and gets sorted first
+      header: 'de;q=.5, en;q=0.4',
+      expectMap: new Map([
+        ['de', { q: '.5' }],
+        ['en', { q: '0.4' }],
+      ]),
+    },
+    {
       header: '',
       expectMap: new Map([]),
     },
@@ -307,6 +330,116 @@ describe('negotiation', () => {
     test(`resolveHeaderToMap: ${JSON.stringify({ header, expectMap })}`, () => {
       const map = resolveHeaderToMap(header);
       expect(map).toEqual(expectMap);
+    });
+  });
+
+  [
+    { attributes: {}, expectedQuality: 1 },
+    { attributes: { q: '1' }, expectedQuality: 1 },
+    { attributes: { q: '1.0' }, expectedQuality: 1 },
+    { attributes: { q: '1.000' }, expectedQuality: 1 },
+    { attributes: { q: '0.5' }, expectedQuality: 0.5 },
+    { attributes: { q: '0.123' }, expectedQuality: 0.123 },
+    { attributes: { q: '0' }, expectedQuality: 0 },
+    { attributes: { q: '0.0' }, expectedQuality: 0 },
+    // values not matching the RFC 9110 qvalue grammar count as absent,
+    // especially ones that would parse to a q=0 refusal by prefix
+    { attributes: { q: 'invalid' }, expectedQuality: 1 },
+    { attributes: { q: '' }, expectedQuality: 1 },
+    { attributes: { q: '.5' }, expectedQuality: 1 },
+    { attributes: { q: '7' }, expectedQuality: 1 },
+    { attributes: { q: '-1' }, expectedQuality: 1 },
+    { attributes: { q: '-0.5' }, expectedQuality: 1 },
+    { attributes: { q: '0,5' }, expectedQuality: 1 },
+    { attributes: { q: '0x1F' }, expectedQuality: 1 },
+    { attributes: { q: '0       .3' }, expectedQuality: 1 },
+    { attributes: { q: '0.1234' }, expectedQuality: 1 },
+    { attributes: { q: '1.1' }, expectedQuality: 1 },
+  ].forEach(({ attributes, expectedQuality }) => {
+    test(`resolveQuality: ${JSON.stringify({ attributes, expectedQuality })}`, () => {
+      expect(resolveQuality(attributes)).toBe(expectedQuality);
+    });
+  });
+
+  describe('resolveAcceptableAndRefused', () => {
+    test('with acceptable and refused entries', () => {
+      expect(
+        resolveAcceptableAndRefused(
+          new Map([
+            ['application/xml', { q: '0.5' }],
+            ['text/html', { q: '1.0' }],
+            ['application/json', { q: '0' }],
+          ]),
+        ),
+      ).toEqual({
+        acceptableEntries: [
+          ['application/xml', { q: '0.5' }],
+          ['text/html', { q: '1.0' }],
+        ],
+        refusedValues: ['application/json'],
+      });
+    });
+
+    test('with empty map', () => {
+      expect(resolveAcceptableAndRefused(new Map())).toEqual({ acceptableEntries: [], refusedValues: [] });
+    });
+  });
+
+  describe('resolveExactMatch', () => {
+    const acceptableEntries: Array<HeaderEntry> = [
+      ['text/html', { q: '1.0' }],
+      ['application/json', { q: '0.8' }],
+      ['application/xml', { q: '0.5' }],
+    ];
+
+    test('with matching supported value, first entry wins', () => {
+      expect(resolveExactMatch(['application/json', 'application/xml'], acceptableEntries)).toEqual({
+        value: 'application/json',
+        attributes: { q: '0.8' },
+      });
+    });
+
+    test('without matching supported value', () => {
+      expect(resolveExactMatch(['application/x-yaml'], acceptableEntries)).toBeUndefined();
+    });
+
+    test('without acceptable entries', () => {
+      expect(resolveExactMatch(['application/json'], [])).toBeUndefined();
+    });
+  });
+
+  describe('resolveWildcardMatch', () => {
+    const acceptableEntries: Array<HeaderEntry> = [
+      ['application/json', { q: '1.0' }],
+      ['*/*', { q: '0.8' }],
+    ];
+
+    test('with wildcard entry and no refused supported value', () => {
+      expect(
+        resolveWildcardMatch('*/*', acceptableEntries, ['application/json', 'application/xml'], () => false),
+      ).toEqual({
+        value: 'application/json',
+        attributes: { q: '0.8' },
+      });
+    });
+
+    test('with wildcard entry skips refused supported values', () => {
+      expect(
+        resolveWildcardMatch(
+          '*/*',
+          acceptableEntries,
+          ['application/json', 'application/xml'],
+          (supportedValue) => 'application/json' === supportedValue,
+        ),
+      ).toEqual({ value: 'application/xml', attributes: { q: '0.8' } });
+    });
+
+    test('with wildcard entry and all supported values refused', () => {
+      expect(resolveWildcardMatch('*/*', acceptableEntries, ['application/json'], () => true)).toBeUndefined();
+    });
+
+    test('without wildcard entry', () => {
+      expect(resolveWildcardMatch('*', acceptableEntries, ['application/json'], () => false)).toBeUndefined();
     });
   });
 });
