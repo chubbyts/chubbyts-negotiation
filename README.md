@@ -24,13 +24,15 @@ A simple negotiation library.
 ## Requirements
 
  * node: 22
+ * [@chubbyts/chubbyts-dic-config-factory][4]: ^1.0.0
+ * [@chubbyts/chubbyts-dic-types][2]: ^2.3.0
 
 ## Installation
 
 Through [NPM](https://www.npmjs.com) as [@chubbyts/chubbyts-negotiation][1].
 
 ```ts
-npm i @chubbyts/chubbyts-negotiation@^4.4.0
+npm i @chubbyts/chubbyts-negotiation@^4.5.1
 ```
 
 ## Usage
@@ -62,8 +64,88 @@ const negotiator = createContentTypeNegotiator(['application/json', 'application
 const value = negotiator.negotiate('application/xml; charset=UTF-8');
 ```
 
+### Service factories (chubbyts-dic-config)
+
+The package ships service factories (abstract factories built on [chubbyts-dic-config-factory][4]) for a [chubbyts-dic-config][3] (or any [chubbyts-dic-types][2] compatible) container within `@chubbyts/chubbyts-negotiation/dist/service-factory`.
+
+Each negotiator reads its supported values from a `<negotiator>SupportedValues` service if registered, and falls back to a default otherwise:
+
+ * `acceptLanguageNegotiatorServiceFactory`: `acceptLanguageNegotiatorSupportedValues`, default `[]`
+ * `acceptNegotiatorServiceFactory`: `acceptNegotiatorSupportedValues`, default the `contentTypes` of the `encoder` service
+ * `contentTypeNegotiatorServiceFactory`: `contentTypeNegotiatorSupportedValues`, default the `contentTypes` of the `decoder` service
+
+The defaults are designed to reuse the type decoders / encoders of [chubbyts-decode-encode][5] (or anything else shaped like `{ contentTypes: Array<string> }`), so the negotiators support exactly what can be decoded / encoded:
+
+```ts
+import type { ConfigFactory } from '@chubbyts/chubbyts-dic-config/dist/dic-config';
+import { createContainerByConfigFactory } from '@chubbyts/chubbyts-dic-config/dist/dic-config';
+import { decoderServiceFactory, encoderServiceFactory } from '@chubbyts/chubbyts-decode-encode/dist/service-factory';
+import type { Negotiator } from '@chubbyts/chubbyts-negotiation/dist/negotiation';
+import {
+  acceptLanguageNegotiatorServiceFactory,
+  acceptNegotiatorServiceFactory,
+  contentTypeNegotiatorServiceFactory,
+} from '@chubbyts/chubbyts-negotiation/dist/service-factory';
+
+const container = createContainerByConfigFactory({
+  dependencies: {
+    factories: new Map<string, ConfigFactory>([
+      ['decoder', decoderServiceFactory()],
+      ['encoder', encoderServiceFactory()],
+      ['acceptLanguageNegotiator', acceptLanguageNegotiatorServiceFactory()],
+      ['acceptLanguageNegotiatorSupportedValues', (): Array<string> => ['en', 'de']],
+      ['acceptNegotiator', acceptNegotiatorServiceFactory()],
+      ['contentTypeNegotiator', contentTypeNegotiatorServiceFactory()],
+    ]),
+  },
+})();
+
+const acceptLanguageNegotiator = container.get<Negotiator>('acceptLanguageNegotiator'); // en, de
+const acceptNegotiator = container.get<Negotiator>('acceptNegotiator'); // all encoder content types
+const contentTypeNegotiator = container.get<Negotiator>('contentTypeNegotiator'); // all decoder content types
+```
+
+To override the supported values, register the related service:
+
+```ts
+const container = createContainerByConfigFactory({
+  dependencies: {
+    factories: new Map<string, ConfigFactory>([
+      ['acceptNegotiator', acceptNegotiatorServiceFactory()],
+      ['acceptNegotiatorSupportedValues', (): Array<string> => ['application/json']],
+    ]),
+  },
+})();
+```
+
+#### With names
+
+To negotiate different parts of an application with different supported values, the same factories can be registered multiple times with a name, which gets appended to each service id (`acceptNegotiatorapi`, `acceptNegotiatorSupportedValuesapi`, `encoderapi`, ...).
+
+```ts
+const container = createContainerByConfigFactory({
+  dependencies: {
+    factories: new Map<string, ConfigFactory>([
+      ['decoderapi', decoderServiceFactory('api')],
+      ['encoderapi', encoderServiceFactory('api')],
+      ['acceptNegotiatorapi', acceptNegotiatorServiceFactory('api')],
+      ['contentTypeNegotiatorapi', contentTypeNegotiatorServiceFactory('api')],
+      ['acceptNegotiatoradmin', acceptNegotiatorServiceFactory('admin')],
+      ['acceptNegotiatorSupportedValuesadmin', (): Array<string> => ['text/html']],
+    ]),
+  },
+})();
+
+const apiAcceptNegotiator = container.get<Negotiator>('acceptNegotiatorapi'); // content types of encoderapi
+const adminAcceptNegotiator = container.get<Negotiator>('acceptNegotiatoradmin'); // text/html
+```
+
 ## Copyright
 
 2026 Dominik Zogg
 
 [1]: https://www.npmjs.com/package/@chubbyts/chubbyts-negotiation
+[2]: https://www.npmjs.com/package/@chubbyts/chubbyts-dic-types
+[3]: https://www.npmjs.com/package/@chubbyts/chubbyts-dic-config
+[4]: https://www.npmjs.com/package/@chubbyts/chubbyts-dic-config-factory
+[5]: https://www.npmjs.com/package/@chubbyts/chubbyts-decode-encode
