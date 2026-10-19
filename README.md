@@ -24,15 +24,15 @@ A simple negotiation library.
 ## Requirements
 
  * node: 22
- * [@chubbyts/chubbyts-dic-config-factory][4]: ^1.0.0
- * [@chubbyts/chubbyts-dic-types][2]: ^2.3.0
+ * [@chubbyts/chubbyts-dic-config-factory][4]: ^1.0.1
+ * [@chubbyts/chubbyts-dic-types][2]: ^2.3.1
 
 ## Installation
 
 Through [NPM](https://www.npmjs.com) as [@chubbyts/chubbyts-negotiation][1].
 
 ```ts
-npm i @chubbyts/chubbyts-negotiation@^4.5.1
+npm i @chubbyts/chubbyts-negotiation@^4.5.2
 ```
 
 ## Usage
