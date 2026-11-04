@@ -4,8 +4,8 @@ import type { Container } from '@chubbyts/chubbyts-dic-types/dist/container';
 import type { ConfigFactory } from '@chubbyts/chubbyts-dic-config/dist/dic-config';
 import { createContainerByConfigFactory } from '@chubbyts/chubbyts-dic-config/dist/dic-config';
 import { decoderServiceFactory, encoderServiceFactory } from '@chubbyts/chubbyts-decode-encode/dist/service-factory';
-import type { Negotiator } from '../src/negotiation';
-import type { ContentTypesAware } from '../src/service-factory';
+import type { Negotiator } from '../src/negotiation.js';
+import type { ContentTypesAware } from '../src/service-factory.js';
 import {
   acceptLanguageNegotiatorServiceFactory,
   acceptLanguageNegotiatorSupportedValuesServiceFactory,
@@ -13,7 +13,7 @@ import {
   acceptNegotiatorSupportedValuesServiceFactory,
   contentTypeNegotiatorServiceFactory,
   contentTypeNegotiatorSupportedValuesServiceFactory,
-} from '../src/service-factory';
+} from '../src/service-factory.js';
 
 const createContentTypesAware = (contentTypes: Array<string>): ContentTypesAware => ({ contentTypes });
 

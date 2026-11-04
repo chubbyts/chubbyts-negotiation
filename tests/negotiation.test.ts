@@ -1,12 +1,12 @@
 import { describe, expect, test } from 'vitest';
-import type { HeaderEntry } from '../src/negotiation';
+import type { HeaderEntry } from '../src/negotiation.js';
 import {
   resolveAcceptableAndRefused,
   resolveExactMatch,
   resolveHeaderToMap,
   resolveQuality,
   resolveWildcardMatch,
-} from '../src/negotiation';
+} from '../src/negotiation.js';
 
 describe('negotiation', () => {
   [
@@ -334,7 +334,7 @@ describe('negotiation', () => {
   });
 
   [
-    { attributes: {}, expectedQuality: 1 },
+    { attributes: {} as Record<string, string>, expectedQuality: 1 },
     { attributes: { q: '1' }, expectedQuality: 1 },
     { attributes: { q: '1.0' }, expectedQuality: 1 },
     { attributes: { q: '1.000' }, expectedQuality: 1 },

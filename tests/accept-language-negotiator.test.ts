@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { createAcceptLanguageNegotiator } from '../src/accept-language-negotiator';
+import { createAcceptLanguageNegotiator } from '../src/accept-language-negotiator.js';
 
 describe('accept-language-negotiator', () => {
   test('without supported mime types', () => {
