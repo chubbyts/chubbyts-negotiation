@@ -19,7 +19,20 @@
 
 ## Description
 
-A simple negotiation library.
+HTTP content negotiation for the `Accept`, `Accept-Language` and `Content-Type` headers. Given the values your
+application supports, each negotiator picks the best match for a request header and returns it together with its
+attributes, or `undefined` if nothing matches.
+
+ * **Accept**: orders by quality value (`q`), matches exact media types, structured syntax suffixes
+   (`application/json` ↔ `application/vnd.api+json`), type wildcards (`application/*`) and `*/*`
+ * **Accept-Language**: orders by quality value (`q`), matches exact locales, falls back from a region to its
+   language (`de-CH` → `de`) and supports the `*` wildcard
+ * **Content-Type**: matches the single media type of a request body, including the suffix fallback
+   (`application/vnd.api+json` → `application/json`), and returns its parameters (e.g. `charset`)
+ * **q=0** is treated as "not acceptable" as defined in [RFC 9110][6]: refused values are never negotiated, not even
+   through a wildcard
+ * **Service factories** for [chubbyts-dic-config][3] that reuse the content types of
+   [chubbyts-decode-encode][5] decoders / encoders
 
 ## Requirements
 
@@ -32,7 +45,7 @@ A simple negotiation library.
 Through [NPM](https://www.npmjs.com) as [@chubbyts/chubbyts-negotiation][1].
 
 ```ts
-npm i @chubbyts/chubbyts-negotiation@^4.6.0
+npm i @chubbyts/chubbyts-negotiation@^4.6.1
 ```
 
 ## Usage
@@ -40,7 +53,9 @@ npm i @chubbyts/chubbyts-negotiation@^4.6.0
 ### Accept-Language
 
 ```ts
-import { createAcceptLanguageNegotiator } from '@chubbyts/chubbyts-negotiation/accept-language-negotiator';
+import {
+  createAcceptLanguageNegotiator,
+} from '@chubbyts/chubbyts-negotiation/accept-language-negotiator';
 
 const negotiator = createAcceptLanguageNegotiator(['en', 'de']);
 const value = negotiator.negotiate('de,en;q=0.3,en-US;q=0.7');
@@ -49,18 +64,32 @@ const value = negotiator.negotiate('de,en;q=0.3,en-US;q=0.7');
 ### Accept
 
 ```ts
-import { createAcceptNegotiator } from '@chubbyts/chubbyts-negotiation/accept-negotiator';
+import {
+  createAcceptNegotiator,
+} from '@chubbyts/chubbyts-negotiation/accept-negotiator';
 
-const negotiator = createAcceptNegotiator(['application/json', 'application/xml', 'application/x-yaml']);
-const value = negotiator.negotiate('text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q =0.8');
+const negotiator = createAcceptNegotiator([
+  'application/json',
+  'application/xml',
+  'application/x-yaml',
+]);
+const value = negotiator.negotiate(
+  'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q =0.8',
+);
 ```
 
 ### Content-Type
 
 ```ts
-import { createContentTypeNegotiator } from '@chubbyts/chubbyts-negotiation/content-type-negotiator';
+import {
+  createContentTypeNegotiator,
+} from '@chubbyts/chubbyts-negotiation/content-type-negotiator';
 
-const negotiator = createContentTypeNegotiator(['application/json', 'application/xml', 'application/x-yaml']);
+const negotiator = createContentTypeNegotiator([
+  'application/json',
+  'application/xml',
+  'application/x-yaml',
+]);
 const value = negotiator.negotiate('application/xml; charset=UTF-8');
 ```
 
@@ -78,8 +107,13 @@ The defaults are designed to reuse the type decoders / encoders of [chubbyts-dec
 
 ```ts
 import type { ConfigFactory } from '@chubbyts/chubbyts-dic-config/dic-config';
-import { createContainerByConfigFactory } from '@chubbyts/chubbyts-dic-config/dic-config';
-import { decoderServiceFactory, encoderServiceFactory } from '@chubbyts/chubbyts-decode-encode/service-factory';
+import {
+  createContainerByConfigFactory,
+} from '@chubbyts/chubbyts-dic-config/dic-config';
+import {
+  decoderServiceFactory,
+  encoderServiceFactory,
+} from '@chubbyts/chubbyts-decode-encode/service-factory';
 import type { Negotiator } from '@chubbyts/chubbyts-negotiation/negotiation';
 import {
   acceptLanguageNegotiatorServiceFactory,
@@ -93,16 +127,28 @@ const container = createContainerByConfigFactory({
       ['decoder', decoderServiceFactory()],
       ['encoder', encoderServiceFactory()],
       ['acceptLanguageNegotiator', acceptLanguageNegotiatorServiceFactory()],
-      ['acceptLanguageNegotiatorSupportedValues', (): Array<string> => ['en', 'de']],
+      [
+        'acceptLanguageNegotiatorSupportedValues',
+        (): Array<string> => ['en', 'de'],
+      ],
       ['acceptNegotiator', acceptNegotiatorServiceFactory()],
       ['contentTypeNegotiator', contentTypeNegotiatorServiceFactory()],
     ]),
   },
 })();
 
-const acceptLanguageNegotiator = container.get<Negotiator>('acceptLanguageNegotiator'); // en, de
-const acceptNegotiator = container.get<Negotiator>('acceptNegotiator'); // all encoder content types
-const contentTypeNegotiator = container.get<Negotiator>('contentTypeNegotiator'); // all decoder content types
+// en, de
+const acceptLanguageNegotiator = container.get<Negotiator>(
+  'acceptLanguageNegotiator',
+);
+
+// all encoder content types
+const acceptNegotiator = container.get<Negotiator>('acceptNegotiator');
+
+// all decoder content types
+const contentTypeNegotiator = container.get<Negotiator>(
+  'contentTypeNegotiator',
+);
 ```
 
 To override the supported values, register the related service:
@@ -112,7 +158,10 @@ const container = createContainerByConfigFactory({
   dependencies: {
     factories: new Map<string, ConfigFactory>([
       ['acceptNegotiator', acceptNegotiatorServiceFactory()],
-      ['acceptNegotiatorSupportedValues', (): Array<string> => ['application/json']],
+      [
+        'acceptNegotiatorSupportedValues',
+        (): Array<string> => ['application/json'],
+      ],
     ]),
   },
 })();
@@ -131,13 +180,21 @@ const container = createContainerByConfigFactory({
       ['acceptNegotiatorapi', acceptNegotiatorServiceFactory('api')],
       ['contentTypeNegotiatorapi', contentTypeNegotiatorServiceFactory('api')],
       ['acceptNegotiatoradmin', acceptNegotiatorServiceFactory('admin')],
-      ['acceptNegotiatorSupportedValuesadmin', (): Array<string> => ['text/html']],
+      [
+        'acceptNegotiatorSupportedValuesadmin',
+        (): Array<string> => ['text/html'],
+      ],
     ]),
   },
 })();
 
-const apiAcceptNegotiator = container.get<Negotiator>('acceptNegotiatorapi'); // content types of encoderapi
-const adminAcceptNegotiator = container.get<Negotiator>('acceptNegotiatoradmin'); // text/html
+// content types of encoderapi
+const apiAcceptNegotiator = container.get<Negotiator>('acceptNegotiatorapi');
+
+// text/html
+const adminAcceptNegotiator = container.get<Negotiator>(
+  'acceptNegotiatoradmin',
+);
 ```
 
 ## Copyright
@@ -149,3 +206,4 @@ const adminAcceptNegotiator = container.get<Negotiator>('acceptNegotiatoradmin')
 [3]: https://www.npmjs.com/package/@chubbyts/chubbyts-dic-config
 [4]: https://www.npmjs.com/package/@chubbyts/chubbyts-dic-config-factory
 [5]: https://www.npmjs.com/package/@chubbyts/chubbyts-decode-encode
+[6]: https://www.rfc-editor.org/rfc/rfc9110#section-12.4.2

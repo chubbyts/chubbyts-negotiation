@@ -1,13 +1,19 @@
 {
   "name": "@chubbyts/chubbyts-negotiation",
   "type": "module",
-  "version": "4.6.0",
-  "description": "A simple negotiation library.",
+  "version": "4.6.1",
+  "description": "HTTP content negotiation for the Accept, Accept-Language and Content-Type headers, with quality values, wildcards and media type suffixes as defined in RFC 9110.",
   "keywords": [
     "chubbyts",
     "request",
     "server-request",
     "negotiation",
+    "content-negotiation",
+    "accept",
+    "accept-language",
+    "content-type",
+    "http",
+    "rfc9110",
     "psr-7"
   ],
   "author": "Dominik Zogg",
