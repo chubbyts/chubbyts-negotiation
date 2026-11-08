@@ -1,7 +1,7 @@
 {
   "name": "@chubbyts/chubbyts-negotiation",
   "type": "module",
-  "version": "4.5.2",
+  "version": "4.6.0",
   "description": "A simple negotiation library.",
   "keywords": [
     "chubbyts",
@@ -33,19 +33,24 @@
     "dist"
   ],
   "exports": {
+    "./dist/*": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.js",
+      "default": "./dist/*.js"
+    },
     "./*": {
-      "types": "./*.d.ts",
-      "import": "./*.js",
-      "default": "./*.js"
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.js",
+      "default": "./dist/*.js"
     }
   },
   "engines": {
     "node": ">=22"
   },
   "devDependencies": {
-    "@chubbyts/chubbyts-decode-encode": "^2.5.2",
-    "@chubbyts/chubbyts-dic-config": "^2.3.1",
-    "@chubbyts/chubbyts-function-mock": "^2.3.1",
+    "@chubbyts/chubbyts-decode-encode": "^2.7.0",
+    "@chubbyts/chubbyts-dic-config": "^2.4.0",
+    "@chubbyts/chubbyts-function-mock": "^2.4.0",
     "@chubbyts/chubbyts-oxlint": "^1.0.2",
     "@stryker-mutator/core": "^10.0.0",
     "@stryker-mutator/vitest-runner": "^10.0.0",
@@ -61,7 +66,7 @@
   },
   "packageManager": "pnpm@11.28.6+sha512.55d90390c3b39042f1505a2697789f0256c6d95bb28bdd7cb731af1887c9f2629ef581acb9f4e4ec772024c8203c2aed22a03299b97103fdcf32668e905d0024",
   "dependencies": {
-    "@chubbyts/chubbyts-dic-config-factory": "^1.0.1",
-    "@chubbyts/chubbyts-dic-types": "^2.3.1"
+    "@chubbyts/chubbyts-dic-config-factory": "^1.1.0",
+    "@chubbyts/chubbyts-dic-types": "^2.4.0"
   }
 }

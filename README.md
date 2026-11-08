@@ -24,15 +24,15 @@ A simple negotiation library.
 ## Requirements
 
  * node: 22
- * [@chubbyts/chubbyts-dic-config-factory][4]: ^1.0.1
- * [@chubbyts/chubbyts-dic-types][2]: ^2.3.1
+ * [@chubbyts/chubbyts-dic-config-factory][4]: ^1.1.0
+ * [@chubbyts/chubbyts-dic-types][2]: ^2.4.0
 
 ## Installation
 
 Through [NPM](https://www.npmjs.com) as [@chubbyts/chubbyts-negotiation][1].
 
 ```ts
-npm i @chubbyts/chubbyts-negotiation@^4.5.2
+npm i @chubbyts/chubbyts-negotiation@^4.6.0
 ```
 
 ## Usage
@@ -40,7 +40,7 @@ npm i @chubbyts/chubbyts-negotiation@^4.5.2
 ### Accept-Language
 
 ```ts
-import { createAcceptLanguageNegotiator } from '@chubbyts/chubbyts-negotiation/dist/accept-language-negotiator';
+import { createAcceptLanguageNegotiator } from '@chubbyts/chubbyts-negotiation/accept-language-negotiator';
 
 const negotiator = createAcceptLanguageNegotiator(['en', 'de']);
 const value = negotiator.negotiate('de,en;q=0.3,en-US;q=0.7');
@@ -49,7 +49,7 @@ const value = negotiator.negotiate('de,en;q=0.3,en-US;q=0.7');
 ### Accept
 
 ```ts
-import { createAcceptNegotiator } from '@chubbyts/chubbyts-negotiation/dist/accept-negotiator';
+import { createAcceptNegotiator } from '@chubbyts/chubbyts-negotiation/accept-negotiator';
 
 const negotiator = createAcceptNegotiator(['application/json', 'application/xml', 'application/x-yaml']);
 const value = negotiator.negotiate('text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q =0.8');
@@ -58,7 +58,7 @@ const value = negotiator.negotiate('text/html,application/xhtml+xml,application/
 ### Content-Type
 
 ```ts
-import { createContentTypeNegotiator } from '@chubbyts/chubbyts-negotiation/dist/content-type-negotiator';
+import { createContentTypeNegotiator } from '@chubbyts/chubbyts-negotiation/content-type-negotiator';
 
 const negotiator = createContentTypeNegotiator(['application/json', 'application/xml', 'application/x-yaml']);
 const value = negotiator.negotiate('application/xml; charset=UTF-8');
@@ -66,7 +66,7 @@ const value = negotiator.negotiate('application/xml; charset=UTF-8');
 
 ### Service factories (chubbyts-dic-config)
 
-The package ships service factories (abstract factories built on [chubbyts-dic-config-factory][4]) for a [chubbyts-dic-config][3] (or any [chubbyts-dic-types][2] compatible) container within `@chubbyts/chubbyts-negotiation/dist/service-factory`.
+The package ships service factories (abstract factories built on [chubbyts-dic-config-factory][4]) for a [chubbyts-dic-config][3] (or any [chubbyts-dic-types][2] compatible) container within `@chubbyts/chubbyts-negotiation/service-factory`.
 
 Each negotiator reads its supported values from a `<negotiator>SupportedValues` service if registered, and falls back to a default otherwise:
 
@@ -77,15 +77,15 @@ Each negotiator reads its supported values from a `<negotiator>SupportedValues` 
 The defaults are designed to reuse the type decoders / encoders of [chubbyts-decode-encode][5] (or anything else shaped like `{ contentTypes: Array<string> }`), so the negotiators support exactly what can be decoded / encoded:
 
 ```ts
-import type { ConfigFactory } from '@chubbyts/chubbyts-dic-config/dist/dic-config';
-import { createContainerByConfigFactory } from '@chubbyts/chubbyts-dic-config/dist/dic-config';
-import { decoderServiceFactory, encoderServiceFactory } from '@chubbyts/chubbyts-decode-encode/dist/service-factory';
-import type { Negotiator } from '@chubbyts/chubbyts-negotiation/dist/negotiation';
+import type { ConfigFactory } from '@chubbyts/chubbyts-dic-config/dic-config';
+import { createContainerByConfigFactory } from '@chubbyts/chubbyts-dic-config/dic-config';
+import { decoderServiceFactory, encoderServiceFactory } from '@chubbyts/chubbyts-decode-encode/service-factory';
+import type { Negotiator } from '@chubbyts/chubbyts-negotiation/negotiation';
 import {
   acceptLanguageNegotiatorServiceFactory,
   acceptNegotiatorServiceFactory,
   contentTypeNegotiatorServiceFactory,
-} from '@chubbyts/chubbyts-negotiation/dist/service-factory';
+} from '@chubbyts/chubbyts-negotiation/service-factory';
 
 const container = createContainerByConfigFactory({
   dependencies: {

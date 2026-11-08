@@ -1,5 +1,5 @@
-import type { Container } from '@chubbyts/chubbyts-dic-types/dist/container';
-import { createAbstractFactory } from '@chubbyts/chubbyts-dic-config-factory/dist/dic-config-factory';
+import type { Container } from '@chubbyts/chubbyts-dic-types/container';
+import { createAbstractFactory } from '@chubbyts/chubbyts-dic-config-factory/dic-config-factory';
 import { createAcceptLanguageNegotiator } from './accept-language-negotiator.js';
 import { createAcceptNegotiator } from './accept-negotiator.js';
 import { createContentTypeNegotiator } from './content-type-negotiator.js';

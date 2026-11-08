@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'vitest';
-import { useObjectMock } from '@chubbyts/chubbyts-function-mock/dist/object-mock';
-import type { Container } from '@chubbyts/chubbyts-dic-types/dist/container';
-import type { ConfigFactory } from '@chubbyts/chubbyts-dic-config/dist/dic-config';
-import { createContainerByConfigFactory } from '@chubbyts/chubbyts-dic-config/dist/dic-config';
-import { decoderServiceFactory, encoderServiceFactory } from '@chubbyts/chubbyts-decode-encode/dist/service-factory';
+import { useObjectMock } from '@chubbyts/chubbyts-function-mock/object-mock';
+import type { Container } from '@chubbyts/chubbyts-dic-types/container';
+import type { ConfigFactory } from '@chubbyts/chubbyts-dic-config/dic-config';
+import { createContainerByConfigFactory } from '@chubbyts/chubbyts-dic-config/dic-config';
+import { decoderServiceFactory, encoderServiceFactory } from '@chubbyts/chubbyts-decode-encode/service-factory';
 import type { Negotiator } from '../src/negotiation.js';
 import type { ContentTypesAware } from '../src/service-factory.js';
 import {
@@ -264,14 +264,26 @@ describe('integration with chubbyts-dic-config and chubbyts-decode-encode', () =
     expect(container.get<Negotiator>('acceptNegotiator').supportedValues).toEqual([
       'application/json',
       'application/jsonx+xml',
+      'application/jsonl',
+      'application/x-jsonl',
+      'text/jsonl',
+      'application/ndjson',
+      'application/x-ndjson',
       'application/x-www-form-urlencoded',
       'application/x-yaml',
+      'application/yaml',
     ]);
     expect(container.get<Negotiator>('contentTypeNegotiator').supportedValues).toEqual([
       'application/json',
       'application/jsonx+xml',
+      'application/jsonl',
+      'application/x-jsonl',
+      'text/jsonl',
+      'application/ndjson',
+      'application/x-ndjson',
       'application/x-www-form-urlencoded',
       'application/x-yaml',
+      'application/yaml',
     ]);
   });
 
@@ -289,8 +301,8 @@ describe('integration with chubbyts-dic-config and chubbyts-decode-encode', () =
       },
     })();
 
-    expect(container.get<Negotiator>('acceptNegotiatorapi').supportedValues).toHaveLength(4);
-    expect(container.get<Negotiator>('contentTypeNegotiatorapi').supportedValues).toHaveLength(4);
+    expect(container.get<Negotiator>('acceptNegotiatorapi').supportedValues).toHaveLength(10);
+    expect(container.get<Negotiator>('contentTypeNegotiatorapi').supportedValues).toHaveLength(10);
     expect(container.get<Negotiator>('acceptNegotiatoradmin').supportedValues).toEqual(['text/html']);
   });
 });
